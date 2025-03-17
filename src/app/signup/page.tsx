@@ -1,20 +1,20 @@
 "use client";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { userExists } from "./fx";
-import { signIn } from "next-auth/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { signup, userExists } from "./fx";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function Signup() {
   const router = useRouter();
 
   const formSchema = z.object({
     username: z.string().min(5, "Minimum 5 characters"),
     password: z.string().min(8, "Minimum 8 characters"),
+    confPass: z.string().min(8, "Minimum 8 characters"),
   });
 
   const {
@@ -27,41 +27,32 @@ export default function Home() {
     defaultValues: {
       username: "",
       password: "",
+      confPass: "",
     },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    if (!(await userExists(data.username))) {
-      setError("username", { message: "User does not exist" });
+    if (await userExists(data.username)) {
+      setError("username", { message: "User already exists" });
       return;
     }
 
-    const res = await signIn("credentials", {
-      username: data.username,
-      password: data.password,
-      redirect: false,
-    });
-
-    if (!res?.ok) {
-      setError("password", { message: "Wrong password" });
+    if (data.password !== data.confPass) {
+      setError("password", { message: "Passwords don't match" });
+      setError("confPass", { message: "Passwords don't match" });
       return;
     }
 
-    router.push("/market");
+    await signup(data.username, data.confPass);
+    router.push("/");
   }
 
   return (
     <div className="window">
       <Navbar />
-      <div className="w-full flex flex-col items-center">
-        <h1 className="text-5xl font-bold">Market</h1>
-        <p className="py-3">Share files and links with each other!</p>
-      </div>
-      <br />
-
       <div className="card card-border bg-base-100 w-96">
         <div className="card-body">
-          <h2 className="card-title">Login</h2>
+          <h2 className="card-title">Create an account</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Username</legend>
@@ -89,12 +80,25 @@ export default function Home() {
                 </p>
               )}
             </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Confirm Password</legend>
+              <input
+                type="password"
+                className={`input ${errors.confPass && "border-error"}`}
+                {...register("confPass")}
+              />
+              {errors.confPass && (
+                <p className="fieldset-label text-error">
+                  {errors.confPass.message}
+                </p>
+              )}
+            </fieldset>
             <div className="card-actions justify-center mt-2">
-              <button className="btn btn-primary">Login</button>
+              <button className="btn btn-primary">Signup</button>
               <span className="w-full text-center text-neutral-content">
-                Don't have an account?{" "}
-                <Link className="text-secondary" href="/signup">
-                  Sign Up
+                Already have an account?{" "}
+                <Link className="text-secondary" href="/">
+                  Login
                 </Link>
                 .
               </span>
