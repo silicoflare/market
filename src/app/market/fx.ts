@@ -64,7 +64,7 @@ export async function getAssets() {
       data: x.data!,
       file:
         x.type === "file"
-          ? await filestore.getFile("files", `${user!.id}/${x.id}-${x.data}`)
+          ? await filestore.getFile("files", `${x.senderID}/${x.id}-${x.data}`)
           : undefined,
     });
   }

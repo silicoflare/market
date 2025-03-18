@@ -36,6 +36,7 @@ export default function Market() {
               className={`chat ${
                 a.senderID === session?.user.id ? "chat-end" : "chat-start"
               }`}
+              key={a.id}
             >
               <div className="chat-header">
                 {a.senderID}
