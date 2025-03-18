@@ -32,19 +32,14 @@ services:
     networks:
       - market_network
 
-  # app:
-  #   build: .
-  #   container_name: tix_app
-  #   restart: always
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #     storage:
-  #       condition: service_started
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - tix_network
+  app:
+    build: .
+    container_name: market_app
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - market_network
 
 volumes:
   market_store_vol:
